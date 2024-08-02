@@ -430,11 +430,22 @@ export default function Clients() {
     setIsDeleting(true);
   };
   const handleCloseDel = async () => {
-    setIsDeleting(false);
-    setIsEditing(false);
-
-  }
-
+    // Start collapsing by setting `open` to false
+    setOpen(false);
+  
+    // Delay state change to allow Collapse animation to complete
+    setTimeout(() => {
+      // Smoothly scroll to the top or desired position after collapse
+      window.scrollTo({
+        top: 0, // Change this value if you want to scroll to a different position
+        behavior: 'smooth'
+      });
+      
+      setIsDeleting(false);
+      setIsEditing(false);
+    }, 300); // Adjust this delay to match the transition duration
+  };
+  
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -832,7 +843,7 @@ export default function Clients() {
                                           style={{ paddingBottom: 0, paddingTop: 0 }}
                                           colSpan={4}
                                           className="collapsable_table edit_delete_collps">
-                                          <Collapse in={open} timeout="auto" unmountOnExit>
+                                          <Collapse in={open} timeout={800} unmountOnExit>
                                             <Table aria-label="edit table">
                                               <TableBody>
                                                 <TableRow>

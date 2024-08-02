@@ -14,6 +14,7 @@ export default function Alarms() {
   const fileInputRefs = useRef({});
   const userInfo = useSelector((state) => state.user.userInfo);
   const [selectedAlarmId, setSelectedAlarmId] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,17 +27,19 @@ export default function Alarms() {
   useEffect(() => {
     const fetchAlarmDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:6091/api/get-alarm/${userInfo.id}`);
+        const response = await axios.get(`${API_URL}/get-alarm/${userInfo.id}`);
         const alarms = response.data.alarms;
         console.log("alarms", alarms);
         if (alarms) {
+          // const url = process.env.VITE_API_URL;
+          // const fileUrl = url?.split('api')
           setAlarmDetails(alarms);
           alarms.forEach(alarm => {
             setIssueData(prevData => ({
               ...prevData,
               [alarm.id]: {
                 audioFile: null,
-                previewUrl: alarm.audioFilename ? `path/to/uploads/${alarm.audioFilename}` : null,
+                previewUrl: alarm.audioFilename ? `http://localhost:6091/uploads/audios/${alarm.audioFilename}` : null,
                 preview: false,
                 showPreviewButton: !!alarm.audioFilename
               }
@@ -65,7 +68,7 @@ export default function Alarms() {
 
   const handleCreateAlarm = async () => {
     try {
-      const { data } = await axios.post("http://localhost:6091/api/create-alarm", {
+      const { data } = await axios.post(`${API_URL}/create-alarm`, {
         alarmName,
         userId: userInfo.id
       });
@@ -75,7 +78,7 @@ export default function Alarms() {
       setOpen(false);
       setAlarmName('');
 
-      const alarmDetailsResponse = await axios.get(`http://localhost:6091/api/get-alarm/${userInfo.id}`);
+      const alarmDetailsResponse = await axios.get(`${API_URL}/get-alarm/${userInfo.id}`);
       setAlarmDetails(alarmDetailsResponse.data.alarms);
       setSelectedAlarmId(alarmDetailsResponse.data.alarms.id);
       toast.success('Alarm created successfully!');
@@ -109,7 +112,7 @@ export default function Alarms() {
       formData.append('audioFile', issue.audioFile);
       formData.append('alarmId', alarmId);
       formData.append('userId', userInfo.id); // Add userId to formData
-
+  
       try {
         await axios.post(`http://localhost:6091/api/upload/${alarmId}`, formData, {
           headers: {
@@ -117,18 +120,23 @@ export default function Alarms() {
           },
         });
         toast.success('File uploaded successfully!');
-
+  
         // Update the preview state after successful upload
         setIssueData(prevData => ({
           ...prevData,
           [alarmId]: { ...prevData[alarmId], preview: true, showPreviewButton: true }
         }));
       } catch (error) {
+        // Ensure to access the error message from error.response
+        const errorMessage = error.response?.data?.message || 'Error uploading file';
         console.error('Error uploading file:', error);
-        toast.error('Error uploading file');
+        toast.error(errorMessage);
       }
     }
   };
+  
+  
+  
 
   const handlePreview = (issue) => {
     setIssueData(prevData => ({
@@ -179,7 +187,6 @@ export default function Alarms() {
           </Box>
         </Box>
       </Box>
-
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Create New Alarm</DialogTitle>
         <DialogContent>
