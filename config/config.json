@@ -1,0 +1,17 @@
+{
+  "development": {
+    "username": "nexusBoxApp_usr",
+    "password": "CciacsyADPf6sxPz",
+    "database": "nexusBoxApp_db",
+    "host": "192.168.1.30",
+    "port":"3066",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
